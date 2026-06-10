@@ -147,6 +147,36 @@ st.markdown(
         margin-bottom: 14px;
     }
 
+    .map-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 18px;
+    }
+
+    .legend-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #FFFFFF;
+        border: 1px solid #E9EEF5;
+        border-radius: 999px;
+        padding: 8px 12px;
+        box-shadow: 0 10px 24px rgba(120, 140, 170, 0.10);
+        font-size: 12.5px;
+        color: #607086;
+        white-space: nowrap;
+    }
+
+    .legend-line {
+        width: 24px;
+        height: 4px;
+        border-radius: 999px;
+        display: inline-block;
+    }
+
     .route-card {
         background: #FFFFFF;
         border: 1px solid #E9EEF5;
@@ -485,7 +515,7 @@ def style_plotly_figure(fig, height=500, show_legend=True):
     return fig
 
 
-def make_route_line(point_names, steps=40):
+def make_route_line(point_names, steps=45):
     lons = []
     lats = []
 
@@ -748,6 +778,21 @@ st.plotly_chart(
         "staticPlot": True
     }
 )
+
+map_legend_html = '<div class="map-legend">'
+
+for _, row in df.sort_values("route_id").iterrows():
+    route_id = row["route_id"]
+    map_legend_html += f"""
+    <div class="legend-chip">
+        <span class="legend-line" style="background: {ROUTE_COLORS[route_id]};"></span>
+        <span><b>{route_id}</b> {route_flags[route_id]} {row["route_name"]}</span>
+    </div>
+    """
+
+map_legend_html += "</div>"
+
+st.markdown(map_legend_html, unsafe_allow_html=True)
 
 
 def render_route_card(row):
