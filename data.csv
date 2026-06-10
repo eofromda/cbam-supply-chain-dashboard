@@ -1,0 +1,6 @@
+route_id,route_name,production_cost,logistics_cost,embedded_emissions,lead_time,risk_score,route_type
+R1,China -> Korea -> EU,700,160,3.5,32,4,Low-cost high-carbon
+R2,Vietnam -> Korea -> EU,780,140,2.4,28,3,Balanced
+R3,Korea -> EU,850,120,1.8,24,2,Stable home-base
+R4,India -> Korea -> EU,720,190,3.8,35,4,Low-cost high-risk
+R5,Germany/EU -> EU,980,80,0.8,8,1,Low-carbon local
