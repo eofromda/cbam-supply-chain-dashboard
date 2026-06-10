@@ -147,13 +147,6 @@ st.markdown(
         margin-bottom: 14px;
     }
 
-    .route-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 14px;
-        margin-top: 18px;
-    }
-
     .route-card {
         background: #FFFFFF;
         border: 1px solid #E9EEF5;
@@ -201,6 +194,7 @@ st.markdown(
         font-size: 13.5px;
         line-height: 1.6;
         margin-top: 12px;
+        margin-bottom: 18px;
     }
 
     div[data-testid="stMetric"] {
@@ -214,7 +208,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # -----------------------------
 # Data
@@ -426,7 +419,6 @@ df["strategic_score"] = (
 best_cost_route = df.loc[df["final_cost"].idxmin()]
 recommended_strategy_route = df.loc[df["strategic_score"].idxmin()]
 
-
 # -----------------------------
 # Helper functions
 # -----------------------------
@@ -440,7 +432,7 @@ def scenario_to_html(text):
     return "".join([f"<p>{p}</p>" for p in paragraphs])
 
 
-def style_plotly_figure(fig, height=470):
+def style_plotly_figure(fig, height=500):
     fig.update_layout(
         height=height,
         paper_bgcolor="rgba(0,0,0,0)",
@@ -453,11 +445,11 @@ def style_plotly_figure(fig, height=470):
             y=0.98,
             yanchor="top"
         ),
-        margin=dict(l=35, r=30, t=95, b=105),
+        margin=dict(l=35, r=30, t=95, b=115),
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.20,
+            y=-0.22,
             xanchor="center",
             x=0.5,
             font=dict(size=12, color=MUTED)
@@ -469,17 +461,20 @@ def style_plotly_figure(fig, height=470):
             font_color=TEXT
         )
     )
+
     fig.update_xaxes(
         showgrid=False,
         linecolor=GRID,
         tickfont=dict(color=MUTED)
     )
+
     fig.update_yaxes(
         showgrid=True,
         gridcolor=GRID,
         zerolinecolor=GRID,
         tickfont=dict(color=MUTED)
     )
+
     return fig
 
 
@@ -521,8 +516,8 @@ with col2:
         f"""
         <div class="metric-card" style="border-top: 5px solid #38E0B0;">
             <div class="metric-label">{best_cost_label}</div>
-            <div class="metric-value">{best_cost_route["route_id"]}</div>
-            <div class="metric-caption">{best_cost_route["route_name"]}<br>{format_money(best_cost_route["final_cost"])}</div>
+            <div class="metric-value">{best_cost_route['route_id']}</div>
+            <div class="metric-caption">{best_cost_route['route_name']}<br>{format_money(best_cost_route['final_cost'])}</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -533,8 +528,8 @@ with col3:
         f"""
         <div class="metric-card" style="border-top: 5px solid #FF5FA2;">
             <div class="metric-label">{best_strategy_label}</div>
-            <div class="metric-value">{recommended_strategy_route["route_id"]}</div>
-            <div class="metric-caption">{recommended_strategy_route["route_name"]}<br>Score: {recommended_strategy_route["strategic_score"]:,.0f}</div>
+            <div class="metric-value">{recommended_strategy_route['route_id']}</div>
+            <div class="metric-caption">{recommended_strategy_route['route_name']}<br>Score: {recommended_strategy_route['strategic_score']:,.0f}</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -545,12 +540,42 @@ with col3:
 # -----------------------------
 
 locations = {
-    "China": {"lat": 35.8617, "lon": 104.1954, "label": "🇨🇳 China"},
-    "Vietnam": {"lat": 14.0583, "lon": 108.2772, "label": "🇻🇳 Vietnam"},
-    "Korea": {"lat": 35.9078, "lon": 127.7669, "label": "🇰🇷 Korea"},
-    "India": {"lat": 20.5937, "lon": 78.9629, "label": "🇮🇳 India"},
-    "Germany/EU": {"lat": 51.1657, "lon": 10.4515, "label": "🇩🇪 Germany/EU"},
-    "EU": {"lat": 50.8503, "lon": 4.3517, "label": "🇪🇺 EU Market"},
+    "China": {
+        "lat": 35.8617,
+        "lon": 104.1954,
+        "label": "🇨🇳 China",
+        "map_text": "🇨🇳"
+    },
+    "Vietnam": {
+        "lat": 14.0583,
+        "lon": 108.2772,
+        "label": "🇻🇳 Vietnam",
+        "map_text": "🇻🇳"
+    },
+    "Korea": {
+        "lat": 35.9078,
+        "lon": 127.7669,
+        "label": "🇰🇷 Korea",
+        "map_text": "🇰🇷"
+    },
+    "India": {
+        "lat": 20.5937,
+        "lon": 78.9629,
+        "label": "🇮🇳 India",
+        "map_text": "🇮🇳"
+    },
+    "Germany/EU": {
+        "lat": 51.1657,
+        "lon": 10.4515,
+        "label": "🇩🇪 Germany/EU",
+        "map_text": "🇩🇪"
+    },
+    "EU": {
+        "lat": 50.8503,
+        "lon": 4.3517,
+        "label": "🇪🇺 EU Market",
+        "map_text": "🇪🇺"
+    },
 }
 
 route_paths = {
@@ -583,10 +608,10 @@ for _, row in df.iterrows():
             lat=lats,
             mode="lines",
             line=dict(
-                width=7,
+                width=8,
                 color=ROUTE_COLORS[route_id]
             ),
-            opacity=0.20,
+            opacity=0.18,
             hoverinfo="skip",
             showlegend=False
         )
@@ -614,39 +639,50 @@ for _, row in df.iterrows():
     )
 
 node_names = list(locations.keys())
+
+marker_text_positions = [
+    "top left",
+    "bottom right",
+    "top right",
+    "bottom left",
+    "top left",
+    "bottom right"
+]
+
 fig_map.add_trace(
     go.Scattergeo(
         lon=[locations[n]["lon"] for n in node_names],
         lat=[locations[n]["lat"] for n in node_names],
-        text=[locations[n]["label"] for n in node_names],
+        text=[locations[n]["map_text"] for n in node_names],
+        customdata=[locations[n]["label"] for n in node_names],
         mode="markers+text",
         marker=dict(
-            size=12,
+            size=14,
             color="#FFFFFF",
             line=dict(width=3, color="#4D7CFE")
         ),
-        textposition="top center",
-        textfont=dict(size=13, color=TEXT),
-        hovertemplate="<b>%{text}</b><extra></extra>",
+        textposition=marker_text_positions,
+        textfont=dict(size=15, color=TEXT),
+        hovertemplate="<b>%{customdata}</b><extra></extra>",
         showlegend=False
     )
 )
 
 fig_map.update_layout(
-    height=540,
+    height=520,
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="#FFFFFF",
-    margin=dict(l=0, r=0, t=10, b=0),
+    margin=dict(l=0, r=0, t=10, b=15),
     legend=dict(
         orientation="h",
         yanchor="bottom",
-        y=-0.06,
+        y=-0.10,
         xanchor="center",
         x=0.5,
         font=dict(size=11, color=MUTED)
     ),
     geo=dict(
-        projection_type="natural earth",
+        projection_type="mercator",
         showland=True,
         landcolor="#EAF1F7",
         showocean=True,
@@ -654,9 +690,16 @@ fig_map.update_layout(
         showcountries=True,
         countrycolor="#FFFFFF",
         showcoastlines=False,
+        showframe=False,
         bgcolor="rgba(0,0,0,0)",
-        lataxis_showgrid=False,
-        lonaxis_showgrid=False
+        lonaxis=dict(
+            range=[-15, 145],
+            showgrid=False
+        ),
+        lataxis=dict(
+            range=[0, 65],
+            showgrid=False
+        )
     )
 )
 
@@ -672,29 +715,44 @@ st.markdown(
 
 st.plotly_chart(fig_map, use_container_width=True)
 
-route_cards_html = '<div class="route-grid">'
 
-for _, row in df.sort_values("route_id").iterrows():
+def render_route_card(row):
     route_id = row["route_id"]
 
-    route_cards_html += f"""
-    <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
-        <div class="route-top">
-            <div class="route-id">{route_id}</div>
-            <div class="route-flags">{route_flags[route_id]}</div>
+    st.markdown(
+        f"""
+        <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
+            <div class="route-top">
+                <div class="route-id">{route_id}</div>
+                <div class="route-flags">{route_flags[route_id]}</div>
+            </div>
+            <div class="route-name">{row['route_name']}</div>
+            <div class="route-meta">
+                Final Cost: <b>{format_money(row['final_cost'])}</b><br>
+                Emissions: <b>{row['adjusted_emissions']:.2f} tCO2e</b><br>
+                Risk: <b>{row['risk_score']}</b> · Lead Time: <b>{row['lead_time']} days</b>
+            </div>
         </div>
-        <div class="route-name">{row["route_name"]}</div>
-        <div class="route-meta">
-            Final Cost: <b>{format_money(row["final_cost"])}</b><br>
-            Emissions: <b>{row["adjusted_emissions"]:.2f} tCO2e</b><br>
-            Risk: <b>{row["risk_score"]}</b> · Lead Time: <b>{row["lead_time"]} days</b>
-        </div>
-    </div>
-    """
+        """,
+        unsafe_allow_html=True
+    )
 
-route_cards_html += "</div>"
 
-st.markdown(route_cards_html, unsafe_allow_html=True)
+routes_sorted = df.sort_values("route_id").reset_index(drop=True)
+
+top_cols = st.columns(3)
+
+for idx, col in enumerate(top_cols):
+    with col:
+        render_route_card(routes_sorted.iloc[idx])
+
+bottom_cols = st.columns([0.5, 1, 1, 0.5])
+
+with bottom_cols[1]:
+    render_route_card(routes_sorted.iloc[3])
+
+with bottom_cols[2]:
+    render_route_card(routes_sorted.iloc[4])
 
 st.markdown(
     f"""
@@ -862,7 +920,7 @@ with tab3:
         yaxis_title=final_cost_label
     )
 
-    fig_sensitivity = style_plotly_figure(fig_sensitivity, height=500)
+    fig_sensitivity = style_plotly_figure(fig_sensitivity, height=520)
 
     st.plotly_chart(fig_sensitivity, use_container_width=True)
 
