@@ -11,7 +11,7 @@ st.set_page_config(
 
 df = pd.read_csv("data.csv")
 
-st.sidebar.title("Scenario Controls")
+st.sidebar.title("Scenario Controls / 시나리오 설정")
 
 language = st.sidebar.radio(
     "Language / 언어",
@@ -77,49 +77,91 @@ df["strategic_score"] = (
 )
 
 best_cost_route = df.loc[df["final_cost"].idxmin()]
-best_strategy_route = df.loc[df["strategic_score"].idxmin()]
+recommended_strategy_route = df.loc[df["strategic_score"].idxmin()]
 
 if language == "English":
     title = "CBAM Supply Chain Optimisation Dashboard"
-    subtitle = "A fact-based hypothetical scenario for a Korean EV battery components firm entering the EU market"
-    scenario_note = """
-    This dashboard models how carbon costs under the EU Carbon Border Adjustment Mechanism (CBAM)
-    could affect supply chain decisions for a Korean EV battery components firm exporting aluminium
-    battery housing components to the EU market.
+    subtitle = "A scenario-based analysis of carbon costs and supply chain strategy for EU market entry"
 
-    The data is based on simplified scenario assumptions and does not represent confidential company-level data.
+    scenario_note = """
+    This project explores how the EU's Carbon Border Adjustment Mechanism (CBAM) could turn embedded emissions into a measurable supply chain cost.
+
+    Using a hypothetical Korean EV battery components firm, the dashboard compares five possible supply chain routes for aluminium battery enclosure components entering the EU market. Each route is evaluated by production cost, logistics cost, embedded emissions, lead time, and risk.
+
+    The figures used in this analysis are simplified assumptions for scenario comparison. They do not represent confidential company-level data.
     """
+
     best_cost_label = "Lowest Final Cost Route"
-    best_strategy_label = "Best Strategic Route"
+    best_strategy_label = "Recommended Strategic Route"
     final_cost_chart_title = "Final Cost by Supply Chain Route"
     breakdown_chart_title = "Cost Breakdown by Route"
     sensitivity_chart_title = "Carbon Price Sensitivity"
     table_title = "Route Ranking Table"
     data_note = "Data & Assumptions"
+
     route_label = "Route"
     final_cost_label = "Final Cost (USD)"
     cost_label = "Cost (USD)"
     cost_type_label = "Cost Type"
+    carbon_price_label = "Carbon Price (USD per tCO₂e)"
+
+    formula_text = """
+    **Model Formula**
+
+    Final Cost = Production Cost + Adjusted Logistics Cost + CBAM Cost
+
+    CBAM Cost = Adjusted Embedded Emissions × Carbon Price
+
+    Strategic Score = Final Cost + Risk Penalty + Lead Time Penalty
+
+    ---
+
+    **Important Note**
+
+    This project uses a fact-based hypothetical scenario. Cost, emissions, lead time, and risk values are simplified assumptions created for scenario comparison and strategic analysis.
+    """
+
 else:
     title = "CBAM 공급망 최적화 대시보드"
-    subtitle = "한국 EV 배터리 부품 기업의 EU 시장 진입을 가정한 사실 기반 시나리오 모델"
-    scenario_note = """
-    이 대시보드는 EU 탄소국경조정제도(CBAM)가 한국 EV 배터리 부품 기업의
-    알루미늄 배터리 하우징 부품 공급망 선택에 어떤 영향을 줄 수 있는지 모델링합니다.
+    subtitle = "탄소비용이 EU 시장 진입 전략과 공급망 선택에 미치는 영향을 비교한 시나리오 분석"
 
-    사용된 데이터는 시나리오 분석을 위한 단순화된 가정값이며, 실제 기업의 비공개 데이터를 의미하지 않습니다.
+    scenario_note = """
+    이 프로젝트는 EU 탄소국경조정제도(CBAM)가 탄소 배출량을 어떻게 실제 공급망 비용으로 바꿀 수 있는지 분석한다.
+
+    가상의 한국 EV 배터리 부품 기업을 설정하고, 알루미늄 배터리 외장 부품이 EU 시장에 진입하는 다섯 가지 공급망 경로를 비교했다. 각 경로는 생산비, 물류비, 내재 탄소배출량, 리드타임, 위험도를 기준으로 평가된다.
+
+    이 분석에 사용된 수치는 경로 비교를 위한 단순화된 가정값이며, 실제 기업의 비공개 데이터를 의미하지 않는다.
     """
-    best_cost_label = "최종 비용 기준 최적 경로"
-    best_strategy_label = "전략 점수 기준 최적 경로"
+
+    best_cost_label = "최종 비용 기준 최저 비용 경로"
+    best_strategy_label = "전략 기준 추천 경로"
     final_cost_chart_title = "공급망 경로별 최종 비용"
     breakdown_chart_title = "경로별 비용 구조"
     sensitivity_chart_title = "탄소가격 변화에 따른 비용 민감도"
-    table_title = "경로 순위표"
+    table_title = "공급망 경로 순위표"
     data_note = "데이터 및 가정"
+
     route_label = "경로"
     final_cost_label = "최종 비용 (USD)"
     cost_label = "비용 (USD)"
     cost_type_label = "비용 유형"
+    carbon_price_label = "탄소가격 (USD/tCO₂e)"
+
+    formula_text = """
+    **계산 방식**
+
+    최종 비용 = 생산비 + 조정된 물류비 + CBAM 비용
+
+    CBAM 비용 = 조정된 내재 탄소배출량 × 탄소가격
+
+    전략 점수 = 최종 비용 + 위험도 패널티 + 리드타임 패널티
+
+    ---
+
+    **데이터 사용 기준**
+
+    이 프로젝트는 사실 기반의 가상 시나리오를 사용한다. 비용, 배출량, 리드타임, 위험도 수치는 경로 비교와 전략 분석을 위해 단순화한 가정값이다.
+    """
 
 st.title(title)
 st.caption(subtitle)
@@ -143,9 +185,9 @@ with col2:
 with col3:
     st.metric(
         label=best_strategy_label,
-        value=best_strategy_route["route_id"]
+        value=recommended_strategy_route["route_id"]
     )
-    st.write(best_strategy_route["route_name"])
+    st.write(recommended_strategy_route["route_name"])
 
 st.divider()
 
@@ -240,7 +282,7 @@ fig_sensitivity = px.line(
     color="route_name",
     title=sensitivity_chart_title,
     labels={
-        "carbon_price": "Carbon Price (USD per tCO₂e)",
+        "carbon_price": carbon_price_label,
         "sensitivity_final_cost": final_cost_label,
         "route_name": route_label
     }
@@ -277,20 +319,4 @@ st.dataframe(
 
 st.subheader(data_note)
 
-st.markdown(
-    """
-    **Model Formula**
-
-    Final Cost = Production Cost + Adjusted Logistics Cost + CBAM Cost
-
-    CBAM Cost = Adjusted Embedded Emissions × Carbon Price
-
-    Strategic Score = Final Cost + Risk Penalty + Lead Time Penalty
-
-    ---
-
-    **Important Note**
-
-    This project uses a fact-based hypothetical scenario. Cost, emissions, lead time, and risk values are simplified assumptions created for scenario modelling.
-    """
-)
+st.markdown(formula_text)
