@@ -228,7 +228,7 @@ language = st.sidebar.radio(
 
 if language == "English":
     title = "CBAM Supply Chain Optimisation Dashboard"
-    subtitle = "Carbon cost as a strategic variable in EU market entry"
+    subtitle = "A scenario-based analysis of carbon costs and supply chain strategy for EU market entry"
 
     scenario_note = """
     This project explores how the EU Carbon Border Adjustment Mechanism (CBAM) could turn embedded emissions into a measurable supply chain cost.
@@ -245,10 +245,14 @@ if language == "English":
     lead_time_slider_label = "Lead time penalty weight"
 
     carbon_metric_label = "Carbon Price"
+    carbon_metric_caption = "Current carbon price scenario"
     best_cost_label = "Lowest Final Cost Route"
     best_strategy_label = "Recommended Strategic Route"
+
     route_map_title = "World Supply Chain Route Map"
     route_map_subtitle = "Simplified scenario routes connecting production and market-entry points"
+    map_note = "The map shows simplified scenario routes for visual comparison, not exact real-world shipping paths."
+
     final_cost_chart_title = "Final Cost by Supply Chain Route"
     breakdown_chart_title = "Cost Breakdown by Route"
     sensitivity_chart_title = "Carbon Price Sensitivity"
@@ -260,8 +264,7 @@ if language == "English":
     cost_label = "Cost (USD)"
     cost_type_label = "Cost Type"
     carbon_price_label = "Carbon Price (USD per tCO2e)"
-
-    map_note = "The map shows simplified scenario routes for visual comparison, not exact real-world shipping paths."
+    score_label = "Score"
 
     tab_cost = "Cost Comparison"
     tab_breakdown = "Cost Breakdown"
@@ -293,7 +296,7 @@ if language == "English":
 
 else:
     title = "CBAM 공급망 최적화 대시보드"
-    subtitle = "탄소비용을 EU 시장 진입 전략의 핵심 변수로 분석한 공급망 시나리오 대시보드"
+    subtitle = "탄소비용이 EU 시장 진입 전략과 공급망 선택에 미치는 영향을 비교한 시나리오 분석"
 
     scenario_note = """
     이 프로젝트는 EU 탄소국경조정제도(CBAM)가 탄소 배출량을 어떻게 실제 공급망 비용으로 바꿀 수 있는지 분석한다.
@@ -310,10 +313,14 @@ else:
     lead_time_slider_label = "리드타임 가중치"
 
     carbon_metric_label = "탄소가격"
+    carbon_metric_caption = "현재 탄소가격 시나리오"
     best_cost_label = "최종 비용 기준 최저 비용 경로"
     best_strategy_label = "전략 기준 추천 경로"
+
     route_map_title = "세계 공급망 경로 지도"
     route_map_subtitle = "생산 거점과 EU 시장 진입 경로를 단순화하여 시각화한 지도"
+    map_note = "이 지도는 실제 운송 경로가 아니라, 시나리오 비교를 위한 단순화된 경로 시각화입니다."
+
     final_cost_chart_title = "공급망 경로별 최종 비용"
     breakdown_chart_title = "경로별 비용 구조"
     sensitivity_chart_title = "탄소가격 변화에 따른 비용 민감도"
@@ -325,8 +332,7 @@ else:
     cost_label = "비용 (USD)"
     cost_type_label = "비용 유형"
     carbon_price_label = "탄소가격 (USD/tCO2e)"
-
-    map_note = "이 지도는 실제 운송 경로가 아니라, 시나리오 비교를 위한 단순화된 경로 시각화입니다."
+    score_label = "점수"
 
     tab_cost = "비용 비교"
     tab_breakdown = "비용 구조"
@@ -432,7 +438,7 @@ def scenario_to_html(text):
     return "".join([f"<p>{p}</p>" for p in paragraphs])
 
 
-def style_plotly_figure(fig, height=500):
+def style_plotly_figure(fig, height=500, show_legend=True):
     fig.update_layout(
         height=height,
         paper_bgcolor="rgba(0,0,0,0)",
@@ -445,7 +451,7 @@ def style_plotly_figure(fig, height=500):
             y=0.98,
             yanchor="top"
         ),
-        margin=dict(l=35, r=30, t=95, b=115),
+        margin=dict(l=35, r=30, t=105, b=115),
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -454,6 +460,7 @@ def style_plotly_figure(fig, height=500):
             x=0.5,
             font=dict(size=12, color=MUTED)
         ),
+        showlegend=show_legend,
         hoverlabel=dict(
             bgcolor="#FFFFFF",
             font_size=13,
@@ -476,6 +483,28 @@ def style_plotly_figure(fig, height=500):
     )
 
     return fig
+
+
+def render_route_card(row):
+    route_id = row["route_id"]
+
+    st.markdown(
+        f"""
+        <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
+            <div class="route-top">
+                <div class="route-id">{route_id}</div>
+                <div class="route-flags">{route_flags[route_id]}</div>
+            </div>
+            <div class="route-name">{row['route_name']}</div>
+            <div class="route-meta">
+                Final Cost: <b>{format_money(row['final_cost'])}</b><br>
+                Emissions: <b>{row['adjusted_emissions']:.2f} tCO2e</b><br>
+                Risk: <b>{row['risk_score']}</b> · Lead Time: <b>{row['lead_time']} days</b>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # -----------------------------
@@ -505,7 +534,7 @@ with col1:
         <div class="metric-card" style="border-top: 5px solid #4D7CFE;">
             <div class="metric-label">{carbon_metric_label}</div>
             <div class="metric-value">${carbon_price}/tCO2e</div>
-            <div class="metric-caption">Current carbon price scenario</div>
+            <div class="metric-caption">{carbon_metric_caption}</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -529,7 +558,7 @@ with col3:
         <div class="metric-card" style="border-top: 5px solid #FF5FA2;">
             <div class="metric-label">{best_strategy_label}</div>
             <div class="metric-value">{recommended_strategy_route['route_id']}</div>
-            <div class="metric-caption">{recommended_strategy_route['route_name']}<br>Score: {recommended_strategy_route['strategic_score']:,.0f}</div>
+            <div class="metric-caption">{recommended_strategy_route['route_name']}<br>{score_label}: {recommended_strategy_route['strategic_score']:,.0f}</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -713,30 +742,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.plotly_chart(fig_map, use_container_width=True)
-
-
-def render_route_card(row):
-    route_id = row["route_id"]
-
-    st.markdown(
-        f"""
-        <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
-            <div class="route-top">
-                <div class="route-id">{route_id}</div>
-                <div class="route-flags">{route_flags[route_id]}</div>
-            </div>
-            <div class="route-name">{row['route_name']}</div>
-            <div class="route-meta">
-                Final Cost: <b>{format_money(row['final_cost'])}</b><br>
-                Emissions: <b>{row['adjusted_emissions']:.2f} tCO2e</b><br>
-                Risk: <b>{row['risk_score']}</b> · Lead Time: <b>{row['lead_time']} days</b>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+st.plotly_chart(
+    fig_map,
+    use_container_width=True,
+    config={
+        "scrollZoom": False,
+        "displayModeBar": False,
+        "staticPlot": True
+    }
+)
 
 routes_sorted = df.sort_values("route_id").reset_index(drop=True)
 
@@ -793,11 +807,10 @@ with tab1:
     )
 
     fig_final.update_layout(
-        xaxis_tickangle=-25,
-        showlegend=False
+        xaxis_tickangle=-25
     )
 
-    fig_final = style_plotly_figure(fig_final, height=500)
+    fig_final = style_plotly_figure(fig_final, height=500, show_legend=False)
 
     st.plotly_chart(fig_final, use_container_width=True)
 
@@ -841,7 +854,7 @@ with tab2:
         barmode="stack"
     )
 
-    fig_breakdown = style_plotly_figure(fig_breakdown, height=500)
+    fig_breakdown = style_plotly_figure(fig_breakdown, height=500, show_legend=True)
 
     st.plotly_chart(fig_breakdown, use_container_width=True)
 
@@ -920,7 +933,7 @@ with tab3:
         yaxis_title=final_cost_label
     )
 
-    fig_sensitivity = style_plotly_figure(fig_sensitivity, height=520)
+    fig_sensitivity = style_plotly_figure(fig_sensitivity, height=520, show_legend=True)
 
     st.plotly_chart(fig_sensitivity, use_container_width=True)
 
