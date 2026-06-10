@@ -485,6 +485,27 @@ def style_plotly_figure(fig, height=500, show_legend=True):
     return fig
 
 
+def make_route_line(point_names, steps=40):
+    lons = []
+    lats = []
+
+    for i in range(len(point_names) - 1):
+        start = locations[point_names[i]]
+        end = locations[point_names[i + 1]]
+
+        segment_lons = np.linspace(start["lon"], end["lon"], steps)
+        segment_lats = np.linspace(start["lat"], end["lat"], steps)
+
+        if i > 0:
+            segment_lons = segment_lons[1:]
+            segment_lats = segment_lats[1:]
+
+        lons.extend(segment_lons)
+        lats.extend(segment_lats)
+
+    return lons, lats
+
+
 # -----------------------------
 # Hero section
 # -----------------------------
@@ -583,25 +604,13 @@ locations = {
         "label": "🇪🇺 EU Market",
         "map_text": "🇪🇺"
     },
-    "Central Asia": {
-        "lat": 45.0,
-        "lon": 75.0,
-        "label": "Central Asia",
-        "map_text": ""
-    },
-    "Turkey": {
-        "lat": 39.0,
-        "lon": 35.0,
-        "label": "Turkey",
-        "map_text": ""
-    },
 }
 
 route_paths = {
-    "R1": ["China", "Korea", "Central Asia", "Turkey", "EU"],
-    "R2": ["Vietnam", "Korea", "Central Asia", "Turkey", "EU"],
-    "R3": ["Korea", "Central Asia", "Turkey", "EU"],
-    "R4": ["India", "Korea", "Central Asia", "Turkey", "EU"],
+    "R1": ["China", "Korea", "EU"],
+    "R2": ["Vietnam", "Korea", "EU"],
+    "R3": ["Korea", "EU"],
+    "R4": ["India", "Korea", "EU"],
     "R5": ["Germany/EU", "EU"],
 }
 
@@ -617,9 +626,7 @@ fig_map = go.Figure()
 
 for _, row in df.iterrows():
     route_id = row["route_id"]
-    path = route_paths[route_id]
-    lats = [locations[p]["lat"] for p in path]
-    lons = [locations[p]["lon"] for p in path]
+    lons, lats = make_route_line(route_paths[route_id], steps=45)
 
     fig_map.add_trace(
         go.Scattergeo(
