@@ -147,6 +147,13 @@ st.markdown(
         margin-bottom: 14px;
     }
 
+    .route-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+    }
+
     .route-card {
         background: #FFFFFF;
         border: 1px solid #E9EEF5;
@@ -442,15 +449,18 @@ def style_plotly_figure(fig, height=470):
         title=dict(
             font=dict(size=21, color=TEXT),
             x=0.02,
-            xanchor="left"
+            xanchor="left",
+            y=0.98,
+            yanchor="top"
         ),
-        margin=dict(l=25, r=25, t=70, b=45),
+        margin=dict(l=35, r=30, t=95, b=105),
         legend=dict(
             orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
+            yanchor="top",
+            y=-0.20,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=12, color=MUTED)
         ),
         hoverlabel=dict(
             bgcolor="#FFFFFF",
@@ -623,7 +633,7 @@ fig_map.add_trace(
 )
 
 fig_map.update_layout(
-    height=520,
+    height=540,
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="#FFFFFF",
     margin=dict(l=0, r=0, t=10, b=0),
@@ -660,38 +670,38 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-map_col, route_col = st.columns([2.1, 1])
+st.plotly_chart(fig_map, use_container_width=True)
 
-with map_col:
-    st.plotly_chart(fig_map, use_container_width=True)
+route_cards_html = '<div class="route-grid">'
 
-with route_col:
-    for _, row in df.sort_values("route_id").iterrows():
-        route_id = row["route_id"]
-        st.markdown(
-            f"""
-            <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
-                <div class="route-top">
-                    <div class="route-id">{route_id}</div>
-                    <div class="route-flags">{route_flags[route_id]}</div>
-                </div>
-                <div class="route-name">{row["route_name"]}</div>
-                <div class="route-meta">
-                    Final Cost: <b>{format_money(row["final_cost"])}</b><br>
-                    Emissions: <b>{row["adjusted_emissions"]:.2f} tCO2e</b><br>
-                    Risk: <b>{row["risk_score"]}</b> · Lead Time: <b>{row["lead_time"]} days</b>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+for _, row in df.sort_values("route_id").iterrows():
+    route_id = row["route_id"]
 
-    st.markdown(
-        f"""
-        <div class="note-box">{map_note}</div>
-        """,
-        unsafe_allow_html=True
-    )
+    route_cards_html += f"""
+    <div class="route-card" style="border-left: 6px solid {ROUTE_COLORS[route_id]};">
+        <div class="route-top">
+            <div class="route-id">{route_id}</div>
+            <div class="route-flags">{route_flags[route_id]}</div>
+        </div>
+        <div class="route-name">{row["route_name"]}</div>
+        <div class="route-meta">
+            Final Cost: <b>{format_money(row["final_cost"])}</b><br>
+            Emissions: <b>{row["adjusted_emissions"]:.2f} tCO2e</b><br>
+            Risk: <b>{row["risk_score"]}</b> · Lead Time: <b>{row["lead_time"]} days</b>
+        </div>
+    </div>
+    """
+
+route_cards_html += "</div>"
+
+st.markdown(route_cards_html, unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+    <div class="note-box">{map_note}</div>
+    """,
+    unsafe_allow_html=True
+)
 
 # -----------------------------
 # Charts and table
