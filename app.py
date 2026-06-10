@@ -147,31 +147,24 @@ st.markdown(
         margin-bottom: 14px;
     }
 
-    .map-legend {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 10px;
-        margin-bottom: 18px;
-    }
-
     .legend-chip {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         background: #FFFFFF;
         border: 1px solid #E9EEF5;
         border-radius: 999px;
-        padding: 8px 12px;
+        padding: 8px 10px;
         box-shadow: 0 10px 24px rgba(120, 140, 170, 0.10);
-        font-size: 12.5px;
+        font-size: 12px;
         color: #607086;
         white-space: nowrap;
+        margin-bottom: 14px;
     }
 
     .legend-line {
-        width: 24px;
+        width: 22px;
         height: 4px;
         border-radius: 999px;
         display: inline-block;
@@ -779,20 +772,21 @@ st.plotly_chart(
     }
 )
 
-map_legend_html = '<div class="map-legend">'
+legend_cols = st.columns(5)
 
-for _, row in df.sort_values("route_id").iterrows():
+for idx, row in df.sort_values("route_id").reset_index(drop=True).iterrows():
     route_id = row["route_id"]
-    map_legend_html += f"""
-    <div class="legend-chip">
-        <span class="legend-line" style="background: {ROUTE_COLORS[route_id]};"></span>
-        <span><b>{route_id}</b> {route_flags[route_id]} {row["route_name"]}</span>
-    </div>
-    """
 
-map_legend_html += "</div>"
-
-st.markdown(map_legend_html, unsafe_allow_html=True)
+    with legend_cols[idx]:
+        st.markdown(
+            f"""
+            <div class="legend-chip">
+                <span class="legend-line" style="background: {ROUTE_COLORS[route_id]};"></span>
+                <span><b>{route_id}</b> {route_flags[route_id]}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 
 def render_route_card(row):
